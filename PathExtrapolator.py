@@ -95,8 +95,7 @@ if __name__ == '__main__':
     args = sys.argv[1:]
 
     input_file_path = 'input.csv' if len(args) < 1 else args[0]
-    input_file_config = 'config.json' if len(args) < 2 else args[1]
-    output_file_name = 'export_path.csv' if len(args) < 3 else args[2]
+    output_file_name = 'export_path.csv' if len(args) < 2 else args[1]
 
     meters_to_inches = 39.3700787402
 
