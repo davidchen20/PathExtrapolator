@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 from numpy import ndarray
 from pandas import read_csv
 from scipy.interpolate import CubicSpline
-from scipy.integrate import quad
 
 
 def process_path_planner_csv(file: str, conversion_factor: float) -> tuple[
@@ -26,8 +25,8 @@ def process_path_planner_csv(file: str, conversion_factor: float) -> tuple[
     heading_offset = heading[0]
 
     x = [(position - x_offset) * -conversion_factor for position in x]
-    y = [math.radians((position - y_offset)) * conversion_factor for position in y]
-    heading = [(position - heading_offset) for position in heading]
+    y = [(position - y_offset) * conversion_factor for position in y]
+    heading = [math.radians((position - heading_offset)) for position in heading]
 
     return t, x, y, heading
 
