@@ -1,7 +1,7 @@
+from __future__ import annotations
 import math
 import numpy as np
 import csv
-import json
 import sys
 
 from typing import Any, Iterable, Tuple
@@ -10,7 +10,6 @@ from numpy import ndarray
 from pandas import read_csv
 from scipy.interpolate import CubicSpline
 
-
 def process_path_planner_csv(file: str, conversion_factor: float) -> tuple[
     Any, list[float | Any], list[float | Any], Any]:
     data = read_csv(file)
@@ -18,24 +17,26 @@ def process_path_planner_csv(file: str, conversion_factor: float) -> tuple[
     x = data[' xPositionMeters'].tolist()
     y = data[' yPositionMeters'].tolist()
 
-    heading = data[' headingDegrees'].tolist()
+    heading = data[' holonomicRotationDegrees'].tolist()
 
     x_offset = x[0]
     y_offset = y[0]
-    heading_offset = heading[0]
+    heading_offset = -heading[0]
 
     x = [(position - x_offset) * -conversion_factor for position in x]
     y = [(position - y_offset) * conversion_factor for position in y]
-    heading = [math.radians((position - heading_offset)) for position in heading]
+    heading = [math.radians((position - heading_offset) % 360) for position in heading]
 
     return t, x, y, heading
 
 
-def generate_cubic_spline_trajectory(t: list[float | Any], x_points: list[float | Any], y_points: list[float | Any]) -> \
-        tuple[CubicSpline, CubicSpline]:
+def generate_cubic_spline_trajectory(t: list[float | Any], x_points: list[float | Any], y_points: list[float | Any],
+                                     heading_points) -> \
+        Tuple[CubicSpline, CubicSpline, CubicSpline]:
     x_curve = CubicSpline(t, x_points)
     y_curve = CubicSpline(t, y_points)
-    return x_curve, y_curve
+    heading_curve = CubicSpline(t, heading_points)
+    return x_curve, y_curve, heading_curve
 
 
 def remove_repeating_times(t: list[float | Any]) -> list[float | Any]:
@@ -51,11 +52,11 @@ def remove_repeating_times(t: list[float | Any]) -> list[float | Any]:
 
 
 def evaluate_splines(linear_eval_space: np.ndarray, x_curve: CubicSpline,
-                     y_curve: CubicSpline) -> ndarray | Iterable | int | float:
-    return x_curve(linear_eval_space), y_curve(linear_eval_space)
+                     y_curve: CubicSpline, heading_curve: CubicSpline) -> ndarray | Iterable | int | float:
+    return x_curve(linear_eval_space), y_curve(linear_eval_space), heading_curve(linear_eval_space)
 
 
-def calculate_total_spline_distance(linear_eval_space: ndarray, x_spline: CubicSpline, y_spline) -> float:
+def calculate_total_spline_distance(linear_eval_space: ndarray, x_spline: CubicSpline, y_spline) -> int:
     dxdt = x_spline.derivative(1)(linear_eval_space)
     dydt = y_spline.derivative(1)(linear_eval_space)
 
@@ -65,11 +66,11 @@ def calculate_total_spline_distance(linear_eval_space: ndarray, x_spline: CubicS
     return integral
 
 
-def export_path_csv(linear_eval_space: ndarray, x_eval: ndarray, y_eval: ndarray, heading: ndarray, export_file: str):
-    with open(export_file, "w") as file:
+def export_path_csv(linear_eval_space: ndarray, x_eval: ndarray, y_eval: ndarray, theta: ndarray, export_file: str):
+    with open(export_file, "w", newline='') as file:
         csv_writer = csv.writer(file)
         for i in range(0, len(x_eval)):
-            csv_writer.writerow([x_eval[i], y_eval[i], heading[i]])
+            csv_writer.writerow([x_eval[i], y_eval[i], theta[i]])
         file.flush()
         file.close()
 
@@ -81,7 +82,7 @@ def calculate_speeds(x_velocities: ndarray, y_velocities: ndarray) -> list[float
     return speeds
 
 
-def display_charts(linear_eval_space: ndarray, x_eval: ndarray, y_eval: ndarray, speeds: list[float]):
+def display_charts(linear_eval_space: ndarray, x_eval: ndarray, y_eval: ndarray, speeds: ndarray):
     figure, axis = plt.subplots(2, 1)
     axis[0].plot(x_eval, y_eval)
     axis[0].set_title("actual path")
@@ -102,14 +103,14 @@ if __name__ == '__main__':
 
     t = remove_repeating_times(t)
 
-    y_spline, x_spline = generate_cubic_spline_trajectory(t, x, y)
+    y_spline, x_spline, heading_spline = generate_cubic_spline_trajectory(t, x, y, heading)
 
     linear_eval_space = np.linspace(0, t[-1], int(t[-1] / .02))
-    x_eval, y_eval = evaluate_splines(linear_eval_space, x_spline, y_spline)
+    x_eval, y_eval, heading_eval = evaluate_splines(linear_eval_space, x_spline, y_spline, heading_spline)
 
     speeds = calculate_speeds(x_spline.derivative(1)(linear_eval_space), y_spline.derivative(1)(linear_eval_space))
 
     print(calculate_total_spline_distance(linear_eval_space, x_spline, y_spline))
 
-    export_path_csv(linear_eval_space, x_eval, y_eval, heading, output_file_name)
-    display_charts(linear_eval_space, x_eval, y_eval, speeds)
+    export_path_csv(linear_eval_space, x_eval, y_eval, heading_eval, output_file_name)
+    display_charts(linear_eval_space, x_eval, y_eval, heading_eval)
