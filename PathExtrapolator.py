@@ -10,6 +10,7 @@ from numpy import ndarray
 from pandas import read_csv
 from scipy.interpolate import CubicSpline
 
+
 def process_path_planner_csv(file: str, conversion_factor: float) -> tuple[
     Any, list[float | Any], list[float | Any], Any]:
     data = read_csv(file)
@@ -25,9 +26,18 @@ def process_path_planner_csv(file: str, conversion_factor: float) -> tuple[
 
     x = [(position - x_offset) * -conversion_factor for position in x]
     y = [(position - y_offset) * conversion_factor for position in y]
-    heading = [math.radians((position - heading_offset) % 360) for position in heading]
 
-    return t, x, y, heading
+    # for position in heading:
+    #     appended_item = 0
+    #     if position < 0:
+    #         appended_item = position - heading_offset
+    #     else:
+    #         appended_item = heading_offset + position
+    #     heading_filtered.append(math.radians(appended_item))
+
+    heading_filtered = [math.radians((position - heading_offset) % 360) for position in heading]
+
+    return t, x, y, heading_filtered
 
 
 def generate_cubic_spline_trajectory(t: list[float | Any], x_points: list[float | Any], y_points: list[float | Any],
@@ -56,13 +66,14 @@ def evaluate_splines(linear_eval_space: np.ndarray, x_curve: CubicSpline,
     return x_curve(linear_eval_space), y_curve(linear_eval_space), heading_curve(linear_eval_space)
 
 
-def calculate_total_spline_distance(linear_eval_space: ndarray, x_spline: CubicSpline, y_spline) -> int:
-    dxdt = x_spline.derivative(1)(linear_eval_space)
-    dydt = y_spline.derivative(1)(linear_eval_space)
-
+def calculate_total_spline_distance(x_eval: ndarray, y_eval: ndarray) -> int:
     integral = 0
-    for dx, dy in zip(dxdt, dydt):
-        integral += math.sqrt((dx ** 2) + (dy ** 2)) / meters_to_inches
+    lastX = 0
+    lastY = 0
+    for x, y in zip(x_eval, y_eval):
+        integral += (math.sqrt(((x - lastX) ** 2) + ((y - lastY) ** 2)))
+        lastX = x
+        lastY = y
     return integral
 
 
@@ -82,12 +93,14 @@ def calculate_speeds(x_velocities: ndarray, y_velocities: ndarray) -> list[float
     return speeds
 
 
-def display_charts(linear_eval_space: ndarray, x_eval: ndarray, y_eval: ndarray, speeds: ndarray):
-    figure, axis = plt.subplots(2, 1)
+def display_charts(linear_eval_space: ndarray, x_eval: ndarray, y_eval: ndarray, heading: ndarray, speeds: ndarray):
+    figure, axis = plt.subplots(3, 1)
     axis[0].plot(x_eval, y_eval)
     axis[0].set_title("actual path")
-    axis[1].plot(linear_eval_space, speeds)
-    axis[1].set_title("velocity")
+    axis[1].plot(linear_eval_space, heading)
+    axis[1].set_title("heading")
+    axis[2].plot(linear_eval_space, speeds)
+    axis[2].set_title("velocity")
     plt.show()
 
 
@@ -110,7 +123,9 @@ if __name__ == '__main__':
 
     speeds = calculate_speeds(x_spline.derivative(1)(linear_eval_space), y_spline.derivative(1)(linear_eval_space))
 
-    print(calculate_total_spline_distance(linear_eval_space, x_spline, y_spline))
+    print(calculate_total_spline_distance(x_eval, y_eval))
 
-    export_path_csv(linear_eval_space, x_eval, y_eval, heading_eval, output_file_name)
-    display_charts(linear_eval_space, x_eval, y_eval, heading_eval)
+    export_path_csv(linear_eval_space, x_eval, y_eval, heading_eval, "blue_"+output_file_name)
+    export_path_csv(linear_eval_space, -x_eval, y_eval, -heading_eval, "red_"+output_file_name)
+    display_charts(linear_eval_space, -x_eval, y_eval, -heading_eval, speeds)
+
