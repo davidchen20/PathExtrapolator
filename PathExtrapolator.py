@@ -22,7 +22,7 @@ def process_path_planner_csv(file: str, conversion_factor: float) -> tuple[
 
     x_offset = x[0]
     y_offset = y[0]
-    heading_offset = -heading[0]
+    heading_offset = heading[0]
 
     x = [(position - x_offset) * -conversion_factor for position in x]
     y = [(position - y_offset) * conversion_factor for position in y]
@@ -35,7 +35,7 @@ def process_path_planner_csv(file: str, conversion_factor: float) -> tuple[
     #         appended_item = heading_offset + position
     #     heading_filtered.append(math.radians(appended_item))
 
-    heading_filtered = [math.radians((position - heading_offset) % 360) for position in heading]
+    heading_filtered = [math.radians((position - heading_offset)) for position in heading]
 
     return t, x, y, heading_filtered
 
