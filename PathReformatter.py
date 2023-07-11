@@ -14,8 +14,8 @@ from scipy.interpolate import CubicSpline, CubicHermiteSpline
 
 def process_path_planner_csv(file: str, conversion_factor: float) -> Tuple[
     Any, List[float | Any], List[float | Any], List[float], Any, List[float], List[float], List[Any]]:
-    data = read_csv(file)
-    t = data['timeSeconds'].tolist()
+    data = read_csv(file, skiprows=1)
+    t = data['# timeSeconds'].tolist()
     x = data[' xPositionMeters'].tolist()
     y = data[' yPositionMeters'].tolist()
 
@@ -93,20 +93,22 @@ if __name__ == '__main__':
 
     filename = 'three_piece_nobump'
 
-    t, y, x, heading, lin_vel, ang_vel, directional_motion, offsets = process_path_planner_csv('input.csv', 1)
+    t, y, x, heading, lin_vel, ang_vel, directional_motion, offsets = process_path_planner_csv('C:\\Users\\mchan'
+                                                                                               '\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\generatedCSV\\3-piece-nobump-correct.csv', 1)
 
+    # for three-piece auto
     event_poses = [
         [1, "intake.extend"],
         [2, "intake.runIn"],
-        [4, "intake.stop"],
-        [6, "intake.runOut"],
+        [3, "intake.stop"],
+        [5, "intake.runOut"],
         [7, "intake.stop"],
         [8, 'intake.runIn'],
-        [10, 'intake.stop'],
+        [9, 'intake.stop'],
         [12, 'intake.runOut']
     ]
 
-    waypoints = process_path_json("input.json")['waypoints']
+    waypoints = process_path_json("C:\\Users\\mchan\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\3-piece-nobump-correct.path")['waypoints']
 
     for i in range(len(event_poses)):
         wp_num = event_poses[i][0]
