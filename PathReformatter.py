@@ -91,7 +91,7 @@ def process_path_json(file_path: str):
 
 if __name__ == '__main__':
 
-    filename = 'three_piece_nobump'
+    filename = 'three_piece_nobump_wip'
 
     t, y, x, heading, lin_vel, ang_vel, directional_motion, offsets = process_path_planner_csv('C:\\Users\\mchan'
                                                                                                '\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\generatedCSV\\3-piece-nobump-correct.csv', 1)
@@ -102,14 +102,32 @@ if __name__ == '__main__':
         [2, "intake.runIn"],
         [3, "intake.stop"],
         [5, "intake.runOut"],
-        [7, "intake.stop"],
+        [6, "intake.stop"],
         [8, 'intake.runIn'],
         [9, 'intake.stop'],
         [12, 'intake.runOut']
     ]
 
     waypoints = process_path_json("C:\\Users\\mchan\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\3-piece-nobump-correct.path")['waypoints']
+    '''
+    t, y, x, heading, lin_vel, ang_vel, directional_motion, offsets = process_path_planner_csv('C:\\Users\\mchan'
+                                                                                               '\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\generatedCSV\\3-piece-bump.csv', 1)
 
+    # for three-piece auto
+    event_poses = [
+        [1, "intake.extend"],
+        [4, "intake.runIn"],
+        [6, "intake.stop"],
+        [9, "intake.runOut"],
+        [10, "intake.stop"],
+        [11, 'intake.runIn'],
+        [12, 'intake.stop'],
+        [16, 'intake.runOut']
+    ]
+
+    # waypoints = process_path_json("C:\\Users\\mchan\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\3-piece-bump.path")['waypoints']
+
+    '''
     for i in range(len(event_poses)):
         wp_num = event_poses[i][0]
         ev_name = event_poses[i][1]
