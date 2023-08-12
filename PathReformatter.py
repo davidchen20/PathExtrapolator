@@ -169,6 +169,6 @@ if __name__ == '__main__':
         event_poses[i][0] = event_poses[i][0] - offsets[1]
         event_poses[i][1] = offsets[0] - event_poses[i][1]
 
-    event_poses = export_reformatted_csv('blue_'+ filename + '.csv', t, [-i for i in x], [-i for i in y], heading, [-1 for i in lin_vel], ang_vel, directional_motion, event_poses)
-    export_reformatted_csv('red_'+ filename + '.csv', t, [i for i in x], y, [-i for i in heading], lin_vel, ang_vel, [-i for i in directional_motion], [[-x, y, name] for x, y, name in event_poses])
+    event_poses = export_reformatted_csv('blue_'+ filename + '.csv', t, x, y, heading, lin_vel, ang_vel, directional_motion, event_poses)
+    export_reformatted_csv('red_'+ filename + '.csv', t, [-i for i in x], y, [-i for i in heading], lin_vel, ang_vel, [-i for i in directional_motion], [[-x, y, name] for x, y, name in event_poses])
     display_charts(t, [-i for i in x], y, [-i for i in lin_vel], [[-x, y, name] for x, y, name in event_poses])
