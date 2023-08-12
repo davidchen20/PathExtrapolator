@@ -91,27 +91,37 @@ def process_path_json(file_path: str):
 
 if __name__ == '__main__':
 
-    filename = 'three_piece_nobump_wip'
+    filename = 'New_New_New_New_Path'
 
-    t, y, x, heading, lin_vel, ang_vel, directional_motion, offsets = process_path_planner_csv('C:\\Users\\mchan'
-                                                                                               '\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\generatedCSV\\3-piece-nobump-correct.csv', 1)
 
+    t, y, x, heading, lin_vel, ang_vel, directional_motion, offsets = process_path_planner_csv('D:\\FRC Charged Up\\FRCProjects\\2023RobotCode\\src\\main\\deploy\\pathplanner\\generatedCSV\\New New New New Path.csv', 1)
     # for three-piece auto
-    event_poses = [
-        [1, "intake.extend"],
-        [2, "intake.runIn"],
-        [3, "intake.stop"],
-        [5, "intake.runOut"],
-        [6, "intake.stop"],
-        [8, 'intake.runIn'],
-        [9, 'intake.stop'],
-        [12, 'intake.runOut']
-    ]
+    # event_poses = [
+    #     [1, "intake.extend"],
+    #     [2, "intake.runIn"],
+    #     [3, "intake.stop"],
+    #     [5, "intake.runOut"],
+    #     [6, "intake.stop"],
+    #     [8, 'intake.runIn'],
+    #     [9, 'intake.stop'],
+    #     [12, 'intake.runOut']
+    # ]
 
-    waypoints = process_path_json("C:\\Users\\mchan\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\3-piece-nobump-correct.path")['waypoints']
+    #start count from 0
+    # event_poses = [
+    #     # [1, "intake.extend"],
+    #     # [2, "intake.runIn"],
+    #     # [3, "intake.stop"],
+    #     # [5, "intake.runOut"],
+    #     # [6, "intake.stop"],
+    #     # [8, 'intake.runIn'],
+    #     [3, 'intake.runIn'],
+    #     [4, 'intake.stop']
+    # ]
+
+    waypoints = process_path_json("D:\\FRC Charged Up\\FRCProjects\\2023RobotCode\\src\\main\\deploy\\pathplanner\\New New New Path.path")['waypoints']
     '''
-    t, y, x, heading, lin_vel, ang_vel, directional_motion, offsets = process_path_planner_csv('C:\\Users\\mchan'
-                                                                                               '\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\generatedCSV\\3-piece-bump.csv', 1)
+    t, y, x, heading, lin_vel, ang_vel, directional_motion, offsets = process_path_planner_csv('D:\\FRC Charged Up\\FRCProjects\\2023RobotCode\\src\\main\\deploy\\pathplanner\\generatedCSV\\New New New New Path.csv', 1)
 
     # for three-piece auto
     event_poses = [
@@ -124,11 +134,33 @@ if __name__ == '__main__':
         [12, 'intake.stop'],
         [16, 'intake.runOut']
     ]
+    
+    # event_poses = [
+    #     [2, "intake.extend"],
+    #     [4, "intake.runIn"],
+    #     [5, "intake.stop"],
+    #   
+    # ]
 
-    # waypoints = process_path_json("C:\\Users\\mchan\\Documents\\Programming\\Robotics\\2023RobotCode\\src\\main\\deploy\\pathplanner\\3-piece-bump.path")['waypoints']
+    # waypoints = process_path_json("D:\\FRC Charged Up\\FRCProjects\\2023RobotCode\\src\\main\\deploy\\pathplanner\\New New New New Path.path")['waypoints']
 
     '''
+    # event_poses = [[1, "intake.extend"],
+                   # [1, "intake.runIn"],
+                   # [2, "intake.retract"]]
+                   # [3, "intake.deadStop"]]
+    # event_poses = [[1, "intake.runIn"],
+                   # [2, "intake.stop"]]
+    # event_poses = [
+    #     [2, "intake.extend"],
+    #     [4, "intake.runIn"],
+    #     [5, "intake.stop"],
+    #
+    # ]
+
+    event_poses = []
     for i in range(len(event_poses)):
+        # wp_num = event_poses[i][0] - 1
         wp_num = event_poses[i][0]
         ev_name = event_poses[i][1]
         event_poses[i] = [waypoints[wp_num]['anchorPoint']['y'], waypoints[wp_num]['anchorPoint']['x'], ev_name]
@@ -137,6 +169,6 @@ if __name__ == '__main__':
         event_poses[i][0] = event_poses[i][0] - offsets[1]
         event_poses[i][1] = offsets[0] - event_poses[i][1]
 
-    event_poses = export_reformatted_csv('blue_'+ filename + '.csv', t, x, y, heading, lin_vel, ang_vel, directional_motion, event_poses)
-    export_reformatted_csv('red_'+ filename + '.csv', t, [-i for i in x], y, [-i for i in heading], lin_vel, ang_vel, [-i for i in directional_motion], [[-x, y, name] for x, y, name in event_poses])
-    display_charts(t, [-i for i in x], y, [-i for i in heading], [[-x, y, name] for x, y, name in event_poses])
+    event_poses = export_reformatted_csv('blue_'+ filename + '.csv', t, [-i for i in x], [-i for i in y], heading, [-1 for i in lin_vel], ang_vel, directional_motion, event_poses)
+    export_reformatted_csv('red_'+ filename + '.csv', t, [i for i in x], y, [-i for i in heading], lin_vel, ang_vel, [-i for i in directional_motion], [[-x, y, name] for x, y, name in event_poses])
+    display_charts(t, [-i for i in x], y, [-i for i in lin_vel], [[-x, y, name] for x, y, name in event_poses])
